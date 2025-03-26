@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Sales Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .settings-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .edit-form {
+            display: none;
+            margin-top: 10px;
+        }
+        .alert {
+            display: none;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Settings</h1>
+            <a href="/" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
+
+        <div class="settings-container">
+            <!-- Categories Section -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Categories</h5>
+                </div>
+                <div class="card-body">
+                    <form id="addCategoryForm" class="mb-4">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="newCategory" placeholder="New category name" required>
+                            <button type="submit" class="btn btn-primary">Add Category</button>
+                        </div>
+                    </form>
+
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Category Name</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for category in categories %}
+                                <tr>
+                                    <td>
+                                        <span class="category-name">{{ category }}</span>
+                                        <form class="edit-form" data-category="{{ category }}">
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" value="{{ category }}" required>
+                                                <button type="submit" class="btn btn-success">Save</button>
+                                                <button type="button" class="btn btn-secondary cancel-edit">Cancel</button>
+                                            </div>
+                                        </form>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary edit-category">Edit</button>
+                                        <button class="btn btn-sm btn-danger delete-category">Delete</button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Regions Section -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Regions</h5>
+                </div>
+                <div class="card-body">
+                    <form id="addRegionForm" class="mb-4">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="newRegion" placeholder="New region name" required>
+                            <button type="submit" class="btn btn-primary">Add Region</button>
+                        </div>
+                    </form>
+
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Region Name</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for region in regions %}
+                                <tr>
+                                    <td>
+                                        <span class="region-name">{{ region }}</span>
+                                        <form class="edit-form" data-region="{{ region }}">
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" value="{{ region }}" required>
+                                                <button type="submit" class="btn btn-success">Save</button>
+                                                <button type="button" class="btn btn-secondary cancel-edit">Cancel</button>
+                                            </div>
+                                        </form>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary edit-region">Edit</button>
+                                        <button class="btn btn-sm btn-danger delete-region">Delete</button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // Add Category
+            $('#addCategoryForm').on('submit', function(e) {
+                e.preventDefault();
+                const category = $('#newCategory').val();
+                $.post('/add_category', { category: category }, function(response) {
+                    if (response.status === 'success') {
+                        location.reload();
+                    } else {
+                        alert(response.message);
+                    }
+                });
+            });
+
+            // Add Region
+            $('#addRegionForm').on('submit', function(e) {
+                e.preventDefault();
+                const region = $('#newRegion').val();
+                $.post('/add_region', { region: region }, function(response) {
+                    if (response.status === 'success') {
+                        location.reload();
+                    } else {
+                        alert(response.message);
+                    }
+                });
+            });
+
+            // Delete Category
+            $('.delete-category').on('click', function() {
+                if (confirm('Are you sure you want to delete this category?')) {
+                    const category = $(this).closest('tr').find('.category-name').text();
+                    $.post('/delete_category', { category: category }, function(response) {
+                        if (response.status === 'success') {
+                            location.reload();
+                        } else {
+                            alert(response.message);
+                        }
+                    });
+                }
+            });
+
+            // Delete Region
+            $('.delete-region').on('click', function() {
+                if (confirm('Are you sure you want to delete this region?')) {
+                    const region = $(this).closest('tr').find('.region-name').text();
+                    $.post('/delete_region', { region: region }, function(response) {
+                        if (response.status === 'success') {
+                            location.reload();
+                        } else {
+                            alert(response.message);
+                        }
+                    });
+                }
+            });
+
+            // Edit Category
+            $('.edit-category').on('click', function() {
+                const row = $(this).closest('tr');
+                row.find('.category-name').hide();
+                row.find('.edit-form').show();
+            });
+
+            // Edit Region
+            $('.edit-region').on('click', function() {
+                const row = $(this).closest('tr');
+                row.find('.region-name').hide();
+                row.find('.edit-form').show();
+            });
+
+            // Cancel Edit
+            $('.cancel-edit').on('click', function() {
+                const row = $(this).closest('tr');
+                row.find('.edit-form').hide();
+                row.find('.category-name, .region-name').show();
+            });
+
+            // Save Category Edit
+            $('.edit-form[data-category]').on('submit', function(e) {
+                e.preventDefault();
+                const oldCategory = $(this).data('category');
+                const newCategory = $(this).find('input').val();
+                $.post('/edit_category', {
+                    old_category: oldCategory,
+                    new_category: newCategory
+                }, function(response) {
+                    if (response.status === 'success') {
+                        location.reload();
+                    } else {
+                        alert(response.message);
+                    }
+                });
+            });
+
+            // Save Region Edit
+            $('.edit-form[data-region]').on('submit', function(e) {
+                e.preventDefault();
+                const oldRegion = $(this).data('region');
+                const newRegion = $(this).find('input').val();
+                $.post('/edit_region', {
+                    old_region: oldRegion,
+                    new_region: newRegion
+                }, function(response) {
+                    if (response.status === 'success') {
+                        location.reload();
+                    } else {
+                        alert(response.message);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

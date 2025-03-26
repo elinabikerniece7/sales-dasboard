@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Upload</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .upload-container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .csv-format {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container py-4">
+        <div class="upload-container">
+            <h2 class="mb-4">CSV Upload</h2>
+            
+            <div class="csv-format">
+                <h5>CSV Format Requirements:</h5>
+                <p>Your CSV file must contain the following columns:</p>
+                <ul>
+                    <li>category</li>
+                    <li>amount</li>
+                    <li>date (YYYY-MM-DD format)</li>
+                    <li>region</li>
+                    <li>product</li>
+                </ul>
+                <p class="mb-0">Example:</p>
+                <pre>category,amount,date,region,product
+Electronics,199.99,2024-03-20,North,Laptop
+Clothing,49.99,2024-03-20,South,T-Shirt</pre>
+            </div>
+
+            <form id="uploadForm" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="file" class="form-label">Select CSV File</label>
+                    <input type="file" class="form-control" id="file" name="file" accept=".csv" required>
+                </div>
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary">Upload CSV</button>
+                    <a href="/download_csv" class="btn btn-success">Download Current Data as CSV</a>
+                    <a href="/" class="btn btn-outline-secondary">Back to Dashboard</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#uploadForm').on('submit', function(e) {
+                e.preventDefault();
+                
+                var formData = new FormData(this);
+                
+                $.ajax({
+                    url: '/upload_csv',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            alert(response.message);
+                            window.location.href = '/all_sales';
+                        } else {
+                            alert('Error: ' + response.message);
+                        }
+                    },
+                    error: function() {
+                        alert('Error occurred while uploading file');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html> 
